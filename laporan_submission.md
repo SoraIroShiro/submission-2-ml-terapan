@@ -174,7 +174,7 @@ Validation RMSE terbaik: 0.2129
 ```
 
 Contoh visualisasi RMSE:
-![grafis](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/dataunderstanding.png)
+![grafis](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/visualisasi%20rmse.png)
 
 
 **Interpretasi:**  
