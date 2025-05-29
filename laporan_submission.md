@@ -1,8 +1,14 @@
 # Laporan Proyek: Sistem Rekomendasi Film Menggunakan Collaborative Filtering
 
+
 ## Project Overview
 
-Sistem rekomendasi film bertujuan membantu pengguna menemukan film yang sesuai dengan preferensi mereka secara otomatis. Dengan banyaknya pilihan film, pengguna sering merasa kesulitan memilih film yang sesuai dengan selera mereka. Proyek ini penting karena dapat meningkatkan pengalaman pengguna dan membantu platform streaming meningkatkan engagement serta retensi pengguna.
+Dalam era digital saat ini, industri hiburan khususnya layanan streaming film menghadapi tantangan besar dalam membantu pengguna menemukan film yang sesuai dengan preferensi mereka. Banyaknya pilihan film yang tersedia justru sering membuat pengguna kebingungan dan mengalami kesulitan dalam menentukan tontonan yang tepat. Hal ini dikenal sebagai masalah **information overload** di domain sistem rekomendasi (recommender system).
+
+Masalah utama yang dihadapi adalah bagaimana memberikan rekomendasi film yang relevan dan personal kepada setiap pengguna, sehingga mereka tidak perlu menghabiskan waktu lama untuk mencari film yang ingin ditonton. Latar belakang pemilihan masalah ini adalah kebutuhan nyata dari platform streaming untuk meningkatkan kepuasan dan engagement pengguna, sekaligus mendorong pengguna agar tetap setia menggunakan layanan mereka.
+
+Dengan membangun sistem rekomendasi film yang efektif, diharapkan pengguna dapat dengan mudah menemukan film yang sesuai dengan selera mereka, sehingga pengalaman menonton menjadi lebih menyenangkan dan efisien. Proyek ini juga berkontribusi pada pengembangan teknologi di bidang data science dan machine learning, khususnya dalam penerapan sistem rekomendasi pada industri hiburan.
+
 
 ## Business Understanding
 
@@ -47,21 +53,35 @@ Distribusi rating didominasi oleh rating 4 dan 5, menunjukkan kecenderungan user
 
 ## Data Preparation
 
-Langkah-langkah data preparation yang dilakukan:
-- Mengecek dan menangani missing value serta duplikasi pada data.
-- Mengubah tipe data agar sesuai (int).
-- Membuat fitur baru untuk content-based filtering (`Genres_str`).
-- Membagi data rating menjadi data training (80%) dan validasi (20%) untuk collaborative filtering.
-- Melakukan normalisasi rating ke rentang [0, 1] untuk model neural network.
+Pada tahap ini dilakukan serangkaian proses untuk memastikan data siap digunakan dalam pemodelan sistem rekomendasi, baik untuk content-based filtering maupun collaborative filtering. Berikut tahapan pemrosesan data yang dilakukan secara runtut:
 
-**Alasan:**  
-Data harus bersih dan bertipe sesuai agar model dapat belajar dengan baik. Pembagian data diperlukan untuk mengukur performa model secara adil. Normalisasi rating membantu proses training model neural network.
+1. **Handling Missing Value**  
+   - Dilakukan pengecekan nilai kosong (missing value) pada dataset `movies` dan `ratings` menggunakan `.isnull().sum()`.  
+   - Hasil: Tidak ditemukan missing value sehingga tidak diperlukan penghapusan atau imputasi data.
+
+2. **Handling Duplikat**  
+   - Dilakukan pengecekan data duplikat pada kedua dataset menggunakan `.duplicated().sum()`.  
+   - Hasil: Tidak ditemukan data duplikat sehingga tidak ada penghapusan data.
+
+3. **Edit/Update Data (Tipe Data)**  
+   - Mengubah tipe data pada kolom `MovieID`, `UserID`, dan `Rating` menjadi integer agar sesuai kebutuhan pemodelan.
+
+4. **Data Splitting**  
+   - Membagi data rating menjadi data training (80%) dan data validasi (20%) secara acak menggunakan `train_test_split`.  
+   - Tujuannya untuk mengukur performa model secara adil dan menghindari data leakage.
+
+5. **Feature Engineering: Ekstraksi Fitur Genre dengan TF-IDF**  
+   - Membuat kolom baru `Genres_str` pada dataset `movies` dengan mengubah pemisah genre dari `|` menjadi spasi.
+   - Melakukan ekstraksi fitur genre menggunakan TF-IDF (`TfidfVectorizer`) dan menghitung kemiripan antar film dengan cosine similarity.
+   - Fitur ini digunakan untuk sistem rekomendasi content-based filtering.
+
+6. **Normalisasi Data**  
+   - Melakukan normalisasi nilai rating ke rentang [0, 1] sebelum digunakan pada model collaborative filtering berbasis neural network.
+
 
 ---
 
-## Modeling and Result
-
-### 1. Content-Based Filtering (TF-IDF)
+## Content-Based Filtering (TF-IDF)
 
 Pada pendekatan ini, sistem merekomendasikan film berdasarkan kemiripan konten, yaitu genre film. Genre diubah menjadi representasi numerik menggunakan TF-IDF, lalu dihitung kemiripan antar film menggunakan cosine similarity. Rekomendasi diberikan berdasarkan film yang paling mirip dengan film yang dipilih pengguna.
 
@@ -87,11 +107,7 @@ def recommend_content_based_tfidf(title, top_n=5):
 
 **Contoh output:**
 ```
-Rekomendasi film mirip dengan 'titanic (1997)':
-                Title                Genres
-123      Film A (1998)     Drama|Romance
-456      Film B (1995)     Drama
-789      Film C (2000)     Romance|Drama
+![Output distribusi data](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/dataunderstanding.png)
 ...
 ```
 
@@ -105,7 +121,9 @@ Rekomendasi film mirip dengan 'titanic (1997)':
 
 ---
 
-### 2. Collaborative Filtering (Neural Network)
+## Modeling and Result
+
+### Collaborative Filtering (Neural Network)
 
 Pada pendekatan ini, model rekomendasi dibangun menggunakan embedding untuk user dan movie. Skor kecocokan dihitung dengan dot product embedding, ditambah bias, dan diaktivasi dengan sigmoid agar output berada di rentang [0, 1]. Model di-train menggunakan data training dan divalidasi pada data validasi.
 
