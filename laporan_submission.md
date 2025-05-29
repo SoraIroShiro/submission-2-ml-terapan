@@ -87,11 +87,6 @@ Pada pendekatan ini, sistem merekomendasikan film berdasarkan kemiripan konten, 
 
 **Cuplikan kode:**
 ```python
-movies['Genres_str'] = movies['Genres'].apply(lambda x: x.replace('|', ' '))
-tfidf = TfidfVectorizer()
-tfidf_matrix = tfidf.fit_transform(movies['Genres_str'])
-cosine_sim_tfidf = cosine_similarity(tfidf_matrix)
-
 def recommend_content_based_tfidf(title, top_n=5):
     idx = movies[movies['Title'].str.lower() == title.lower()].index
     if len(idx) == 0:
@@ -103,12 +98,17 @@ def recommend_content_based_tfidf(title, top_n=5):
     sim_scores = sim_scores[1:top_n+1]
     film_idx = [i[0] for i in sim_scores]
     return movies.iloc[film_idx][['Title', 'Genres']]
+
+# Contoh output rekomendasi content-based
+judul_film = 'titanic (1997)'
+print(f"Rekomendasi film mirip dengan '{judul_film}':")
+display(recommend_content_based_tfidf(judul_film))
 ```
 
 **Contoh output:**
-```
-![Output distribusi data](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/dataunderstanding.png)
-...
+
+![](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/cbf-tfidf.png)
+
 ```
 
 **Kelebihan:**
@@ -200,11 +200,6 @@ Nilai RMSE pada data validasi cukup stabil dan tidak terlalu jauh dari data trai
 
 ---
 
-## Kesimpulan
-
-Sistem rekomendasi film berbasis collaborative filtering dan content-based filtering berhasil dibangun dan mampu memberikan rekomendasi yang relevan kepada pengguna. Model collaborative filtering menunjukkan performa yang baik berdasarkan metrik RMSE, sedangkan content-based filtering dapat memberikan rekomendasi film baru yang serupa secara konten. Untuk pengembangan lebih lanjut, dapat dilakukan penggabungan kedua pendekatan (hybrid recommendation) agar hasil rekomendasi lebih optimal.
-
----
 
 ## Penggunaan Model
 
@@ -250,28 +245,39 @@ def recommend_movies_for_user(user_id, model, movies, ratings, top_n=10):
 # penggunaan
 recommend_movies_for_user(user_id=4, model=model, movies=movies, ratings=ratings, top_n=10)
 ```
-Output
-```
-Rekomendasi untuk UserID: 4
-==============================
-Film dengan rating tertinggi dari user:
-------------------------------
-Hustler, The (1961) : 5
-Raiders of the Lost Ark (1981) : 5
-Rocky (1976) : 5
-Saving Private Ryan (1998) : 5
-Star Wars: Episode IV - A New Hope (1977) : 5
-------------------------------
-Top 10 rekomendasi film:
-------------------------------
-Shawshank Redemption, The (1994) : Drama
-Schindler's List (1993) : Drama|War
-Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963) : Sci-Fi|War
-Godfather, The (1972) : Action|Crime|Drama
-Casablanca (1942) : Drama|Romance|War
-Citizen Kane (1941) : Drama
-Monty Python and the Holy Grail (1974) : Comedy
-Seven Samurai (The Magnificent Seven) (Shichinin no samurai) (1954) : Action|Drama
-American Beauty (1999) : Comedy|Drama
-Sanjuro (1962) : Action|Adventure
-```
+Output:
+![grafis](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/visualisasi%20rmse.png)
+
+
+## Kesimpulan
+
+
+
+### Komparasi Skema
+
+Pada proyek ini, dua pendekatan utama digunakan:
+- **Content-Based Filtering (TF-IDF):** Tidak menggunakan metrik RMSE karena tidak melakukan prediksi rating, melainkan rekomendasi berdasarkan kemiripan konten.
+- **Collaborative Filtering (Neural Network):** Menggunakan RMSE sebagai metrik utama.
+
+Berdasarkan hasil RMSE, collaborative filtering mampu memprediksi rating dengan cukup baik (RMSE validasi stabil dan tidak jauh dari training). Content-based filtering tetap berguna untuk merekomendasikan film baru yang belum pernah dirating user lain.
+
+### Hubungan dengan Business Understanding
+
+- **Problem Statement:**  
+  Model collaborative filtering berhasil memberikan rekomendasi yang relevan dan personal, sehingga membantu pengguna menemukan film sesuai preferensi mereka tanpa harus mencari manual di antara ribuan pilihan.
+
+- **Goals:**  
+  Sistem rekomendasi yang dibangun mampu memberikan saran film secara personal dengan performa prediksi yang baik (RMSE rendah), sehingga meningkatkan kepuasan dan engagement pengguna.
+
+- **Dampak Solusi:**  
+  Dengan RMSE yang rendah dan rekomendasi yang relevan, pengguna lebih mudah menemukan film yang sesuai selera. Hal ini berpotensi meningkatkan waktu tonton, loyalitas, dan retensi pengguna pada platform streaming.
+
+### Kesimpulan
+
+Model collaborative filtering yang dibangun telah memenuhi tujuan bisnis, yaitu memberikan rekomendasi film yang relevan dan personal. Hasil evaluasi menunjukkan model mampu melakukan generalisasi dengan baik dan tidak overfitting.  
+Content-based filtering juga memberikan nilai tambah dengan mampu merekomendasikan film baru.  
+Secara keseluruhan, solusi yang diimplementasikan telah menjawab problem statement dan mencapai goals yang diharapkan.
+
+Model collaborative filtering menunjukkan performa yang baik berdasarkan metrik RMSE, sedangkan content-based filtering dapat memberikan rekomendasi film baru yang serupa secara konten. Untuk pengembangan lebih lanjut, dapat dilakukan penggabungan kedua pendekatan (hybrid recommendation) agar hasil rekomendasi lebih optimal.
+
+---
