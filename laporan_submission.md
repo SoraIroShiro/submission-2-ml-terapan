@@ -81,7 +81,11 @@ Pada tahap ini dilakukan serangkaian proses untuk memastikan data siap digunakan
 
 ---
 
-## Content-Based Filtering (TF-IDF)
+
+
+## Modelling
+
+### Content-Based Filtering (TF-IDF)
 
 Pada pendekatan ini, sistem merekomendasikan film berdasarkan kemiripan konten, yaitu genre film. Genre diubah menjadi representasi numerik menggunakan TF-IDF, lalu dihitung kemiripan antar film menggunakan cosine similarity. Rekomendasi diberikan berdasarkan film yang paling mirip dengan film yang dipilih pengguna.
 
@@ -120,10 +124,12 @@ display(recommend_content_based_tfidf(judul_film))
 
 ---
 
-## Modeling and Result Collaborative Filtering (Neural Network)
+### Collaborative Filtering (Neural Network)
 
 
 Pada pendekatan ini, model rekomendasi dibangun menggunakan embedding untuk user dan movie. Skor kecocokan dihitung dengan dot product embedding, ditambah bias, dan diaktivasi dengan sigmoid agar output berada di rentang [0, 1]. Model di-train menggunakan data training dan divalidasi pada data validasi.
+
+#### Training model Collaborative Filtering (Neural Network)
 
 **Cuplikan kode:**
 
@@ -174,50 +180,7 @@ history = model.fit(
     validation_data=(x_val, y_val)
 )
 ```
-
----
-
-## Evaluation
-
-**Metrik Evaluasi:**  
-- Root Mean Squared Error (RMSE)
-
-**Formula RMSE:**  
-\[
-RMSE = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_{true,i} - y_{pred,i})^2}
-\]
-
-**Hasil Evaluasi:**
-```
-RMSE Training dan Validasi per Epoch:
-========================================
-Epoch  1: Training RMSE = 0.2392 | Validation RMSE = 0.2221
-Epoch  2: Training RMSE = 0.2142 | Validation RMSE = 0.2158
-Epoch  3: Training RMSE = 0.2040 | Validation RMSE = 0.2130
-Epoch  4: Training RMSE = 0.1947 | Validation RMSE = 0.2129
-Epoch  5: Training RMSE = 0.1867 | Validation RMSE = 0.2141
-Epoch  6: Training RMSE = 0.1808 | Validation RMSE = 0.2159
-Epoch  7: Training RMSE = 0.1768 | Validation RMSE = 0.2175
-Epoch  8: Training RMSE = 0.1740 | Validation RMSE = 0.2189
-Epoch  9: Training RMSE = 0.1720 | Validation RMSE = 0.2199
-Epoch 10: Training RMSE = 0.1706 | Validation RMSE = 0.2208
-
-RMSE Terbaik:
-Training RMSE terbaik: 0.1706
-Validation RMSE terbaik: 0.2129
-```
-
-Contoh visualisasi RMSE:
-![grafis](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/visualisasi%20rmse.png)
-
-
-**Interpretasi:**  
-Nilai RMSE pada data validasi cukup stabil dan tidak terlalu jauh dari data training, menandakan model tidak overfitting dan mampu melakukan generalisasi dengan baik.
-
----
-
-
-## Penggunaan Model
+#### Penggunaan Collaborative Filtering (Neural Network)
 
 Cuplikan kode
 ```python
@@ -262,9 +225,8 @@ def recommend_movies_for_user(user_id, model, movies, ratings, top_n=10):
 recommend_movies_for_user(user_id=4, model=model, movies=movies, ratings=ratings, top_n=10)
 ```
 **Top-N Recommendation Output:**
-
 Output:\
-![grafis](https://github.com/SoraIroShiro/submission-2-ml-terapan/blob/main/collaborative-filter.png?raw=true)
+![](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/cbf-tfidf.png)
 
 
 **Kelebihan:**
@@ -275,8 +237,48 @@ Output:\
 - Tidak bisa merekomendasikan film baru (cold start pada item).
 - Membutuhkan data rating yang cukup banyak.
 
+---
 
-## Kesimpulan
+## Evaluation
+
+**Metrik Evaluasi:**  
+- Root Mean Squared Error (RMSE)
+
+**Formula RMSE:**  
+\[
+RMSE = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_{true,i} - y_{pred,i})^2}
+\]
+
+**Hasil Evaluasi:**
+```
+RMSE Training dan Validasi per Epoch:
+========================================
+Epoch  1: Training RMSE = 0.2392 | Validation RMSE = 0.2221
+Epoch  2: Training RMSE = 0.2142 | Validation RMSE = 0.2158
+Epoch  3: Training RMSE = 0.2040 | Validation RMSE = 0.2130
+Epoch  4: Training RMSE = 0.1947 | Validation RMSE = 0.2129
+Epoch  5: Training RMSE = 0.1867 | Validation RMSE = 0.2141
+Epoch  6: Training RMSE = 0.1808 | Validation RMSE = 0.2159
+Epoch  7: Training RMSE = 0.1768 | Validation RMSE = 0.2175
+Epoch  8: Training RMSE = 0.1740 | Validation RMSE = 0.2189
+Epoch  9: Training RMSE = 0.1720 | Validation RMSE = 0.2199
+Epoch 10: Training RMSE = 0.1706 | Validation RMSE = 0.2208
+
+RMSE Terbaik:
+Training RMSE terbaik: 0.1706
+Validation RMSE terbaik: 0.2129
+```
+
+Contoh visualisasi RMSE:
+![grafis](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/visualisasi%20rmse.png)
+
+
+**Interpretasi:**  
+Nilai RMSE pada data validasi cukup stabil dan tidak terlalu jauh dari data training, menandakan model tidak overfitting dan mampu melakukan generalisasi dengan baik.
+
+---
+
+
 
 
 
@@ -298,13 +300,3 @@ Berdasarkan hasil RMSE, collaborative filtering mampu memprediksi rating dengan 
 
 - **Dampak Solusi:**  
   Dengan RMSE yang rendah dan rekomendasi yang relevan, pengguna lebih mudah menemukan film yang sesuai selera. Hal ini berpotensi meningkatkan waktu tonton, loyalitas, dan retensi pengguna pada platform streaming.
-
-### Kesimpulan akhir
-
-Model collaborative filtering yang dibangun telah memenuhi tujuan bisnis, yaitu memberikan rekomendasi film yang relevan dan personal. Hasil evaluasi menunjukkan model mampu melakukan generalisasi dengan baik dan tidak overfitting.  
-Content-based filtering juga memberikan nilai tambah dengan mampu merekomendasikan film baru.  
-Secara keseluruhan, solusi yang diimplementasikan telah menjawab problem statement dan mencapai goals yang diharapkan.
-
-Model collaborative filtering menunjukkan performa yang baik berdasarkan metrik RMSE, sedangkan content-based filtering dapat memberikan rekomendasi film baru yang serupa secara konten. Untuk pengembangan lebih lanjut, dapat dilakukan penggabungan kedua pendekatan (hybrid recommendation) agar hasil rekomendasi lebih optimal.
-
----
