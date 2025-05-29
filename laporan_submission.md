@@ -109,7 +109,6 @@ display(recommend_content_based_tfidf(judul_film))
 
 ![](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/cbf-tfidf.png)
 
-```
 
 **Kelebihan:**
 - Dapat merekomendasikan film baru yang belum pernah dirating user lain.
@@ -121,43 +120,60 @@ display(recommend_content_based_tfidf(judul_film))
 
 ---
 
-## Modeling and Result
+## Modeling and Result Collaborative Filtering (Neural Network)
 
-### Collaborative Filtering (Neural Network)
 
 Pada pendekatan ini, model rekomendasi dibangun menggunakan embedding untuk user dan movie. Skor kecocokan dihitung dengan dot product embedding, ditambah bias, dan diaktivasi dengan sigmoid agar output berada di rentang [0, 1]. Model di-train menggunakan data training dan divalidasi pada data validasi.
 
 **Cuplikan kode:**
+
 ```python
+# training model collaborative filtering
+
 class RecommenderNet(tf.keras.Model):
-    # ...lihat file .ipynb untuk detail kode...
-```
+    def __init__(self, num_users, num_movies, embedding_size, **kwargs):
+        super(RecommenderNet, self).__init__(**kwargs)
+        self.user_embedding = layers.Embedding(
+            num_users,
+            embedding_size,
+            embeddings_initializer='he_normal',
+            embeddings_regularizer=keras.regularizers.l2(1e-6)
+        )
+        self.user_bias = layers.Embedding(num_users, 1)
+        self.movie_embedding = layers.Embedding(
+            num_movies,
+            embedding_size,
+            embeddings_initializer='he_normal',
+            embeddings_regularizer=keras.regularizers.l2(1e-6)
+        )
+        self.movie_bias = layers.Embedding(num_movies, 1)
 
-**Top-N Recommendation Output:**
-```
-Rekomendasi untuk UserID: 4
-==============================
-Film dengan rating tertinggi dari user:
-------------------------------
-Film A : 5
-Film B : 5
-Film C : 4
-...
-------------------------------
-Top 10 rekomendasi film:
-------------------------------
-Film X : Action|Adventure
-Film Y : Comedy|Romance
-...
-```
+    def call(self, inputs):
+        user_vector = self.user_embedding(inputs[:, 0])
+        user_bias = self.user_bias(inputs[:, 0])
+        movie_vector = self.movie_embedding(inputs[:, 1])
+        movie_bias = self.movie_bias(inputs[:, 1])
+        dot_user_movie = tf.reduce_sum(user_vector * movie_vector, axis=1, keepdims=True)
+        x = dot_user_movie + user_bias + movie_bias
+        return tf.nn.sigmoid(x)
 
-**Kelebihan:**
-- Dapat menangkap pola preferensi user yang kompleks.
-- Rekomendasi lebih personal.
+embedding_size = 50
+model = RecommenderNet(num_users, num_movies, embedding_size)
 
-**Kekurangan:**
-- Tidak bisa merekomendasikan film baru (cold start pada item).
-- Membutuhkan data rating yang cukup banyak.
+model.compile(
+    loss=tf.keras.losses.BinaryCrossentropy(),
+    optimizer=keras.optimizers.Adam(learning_rate=0.001),
+    metrics=[tf.keras.metrics.RootMeanSquaredError()]
+)
+
+history = model.fit(
+    x=x_train,
+    y=y_train,
+    batch_size=64,
+    epochs=10,
+    validation_data=(x_val, y_val)
+)
+```
 
 ---
 
@@ -245,8 +261,19 @@ def recommend_movies_for_user(user_id, model, movies, ratings, top_n=10):
 # penggunaan
 recommend_movies_for_user(user_id=4, model=model, movies=movies, ratings=ratings, top_n=10)
 ```
-Output:
-![grafis](https://raw.githubusercontent.com/SoraIroShiro/submission-2-ml-terapan/refs/heads/main/visualisasi%20rmse.png)
+**Top-N Recommendation Output:**
+
+Output:\
+![grafis](https://github.com/SoraIroShiro/submission-2-ml-terapan/blob/main/collaborative-filter.png?raw=true)
+
+
+**Kelebihan:**
+- Dapat menangkap pola preferensi user yang kompleks.
+- Rekomendasi lebih personal.
+
+**Kekurangan:**
+- Tidak bisa merekomendasikan film baru (cold start pada item).
+- Membutuhkan data rating yang cukup banyak.
 
 
 ## Kesimpulan
@@ -272,7 +299,7 @@ Berdasarkan hasil RMSE, collaborative filtering mampu memprediksi rating dengan 
 - **Dampak Solusi:**  
   Dengan RMSE yang rendah dan rekomendasi yang relevan, pengguna lebih mudah menemukan film yang sesuai selera. Hal ini berpotensi meningkatkan waktu tonton, loyalitas, dan retensi pengguna pada platform streaming.
 
-### Kesimpulan
+### Kesimpulan akhir
 
 Model collaborative filtering yang dibangun telah memenuhi tujuan bisnis, yaitu memberikan rekomendasi film yang relevan dan personal. Hasil evaluasi menunjukkan model mampu melakukan generalisasi dengan baik dan tidak overfitting.  
 Content-based filtering juga memberikan nilai tambah dengan mampu merekomendasikan film baru.  
